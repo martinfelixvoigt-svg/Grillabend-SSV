@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Grillabend – SSV Pfungstadt</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Karla:wght@400;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --khaki-dunkel:#756B51;
+  --khaki:#8F8771;
+  --schild:#4B605F;
+  --schild-tief:#3B4D4C;
+  --gold:#F0C949;
+  --gold-tief:#C9A22C;
+  --rot:#CC3C33;
+  --blau:#284C98;
+  --karte:#F5F3ED;
+  --tinte:#22261F;
+  --grau:#6E7268;
+  --kante:#D7D2C3;
+  --signal:#CC3C33;
+  --tanne:#4B605F;
+  --tanne-hell:#3B4D4C;
+  --radius:12px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:linear-gradient(180deg,var(--khaki-dunkel) 0%,var(--khaki) 55%,var(--khaki) 100%);
+  background-attachment:fixed;
+  color:var(--tinte);
+  font-family:"Karla",system-ui,sans-serif;
+  font-size:17px;line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+.seite{max-width:660px;margin:0 auto;padding:0 0 70px}
+h1,h2{font-family:"Anton",Impact,sans-serif;font-weight:400;letter-spacing:.02em;text-transform:uppercase;margin:0}
+.mono{font-family:"Space Mono",ui-monospace,monospace}
+
+/* Kopf */
+.kopf{background:var(--schild);color:#fff;padding:20px 18px;display:flex;gap:15px;align-items:center;border-bottom:3px solid var(--gold)}
+.kopf img{width:74px;height:auto;flex:none;filter:drop-shadow(0 2px 4px rgba(0,0,0,.35))}
+.kopf .eyebrow{font-family:"Space Mono",monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:#B7C7BB}
+.kopf h1{font-size:clamp(28px,8vw,40px);line-height:.95;margin:4px 0 0}
+.kopf h1 em{font-style:normal;color:var(--gold)}
+.termin{background:var(--schild-tief);color:#EDE8D8;border-bottom:1px solid rgba(240,201,73,.35);padding:11px 18px;font-family:"Space Mono",monospace;font-size:14px;letter-spacing:.04em;
+  display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.termin b{font-weight:700}
+.inhalt{padding:20px 18px 0}
+
+/* Rost */
+.rost-karte{border-radius:var(--radius);overflow:hidden;margin-bottom:22px;border:1px solid var(--kante);background:var(--karte);box-shadow:0 2px 6px rgba(30,26,16,.14)}
+.rost-kopf{display:flex;justify-content:space-between;align-items:baseline;padding:14px 16px;gap:12px}
+.rost-kopf h2{font-size:19px}
+.rost-kopf span{font-family:"Space Mono",monospace;font-size:12px;color:var(--grau)}
+.zaehlung{display:flex;flex-wrap:wrap;border-top:1px solid var(--kante)}
+.zahl b{font-size:28px}
+.zahl{flex:1 1 33%;min-width:104px;padding:12px 14px;border-right:1px solid var(--kante);border-bottom:1px solid var(--kante)}
+.zahl b{font-family:"Space Mono",monospace;font-size:25px;font-weight:700;display:block;line-height:1.1}
+.zahl b.aus{color:var(--kante)}
+.zahl span{font-size:13px;color:var(--grau);display:block;line-height:1.3}
+
+/* Karten */
+.karte{background:var(--karte);border:1px solid var(--kante);border-radius:var(--radius);padding:17px;margin-bottom:22px;box-shadow:0 2px 6px rgba(30,26,16,.14)}
+.karte > h2{font-size:19px}
+.hinweis{color:var(--grau);font-size:14px;margin:5px 0 15px}
+label{display:block;font-size:12px;letter-spacing:.13em;text-transform:uppercase;color:var(--grau);margin-bottom:6px;font-family:"Space Mono",monospace}
+input[type=text],select{
+  width:100%;background:#F7F8F5;border:1px solid var(--kante);color:var(--tinte);
+  border-radius:9px;padding:11px 13px;font-family:inherit;font-size:17px;
+}
+input[type=text]::placeholder{color:#A7ADA6}
+input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+.feld{margin-bottom:16px}
+
+.zeile{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid #EDEFEA}
+.zeile:last-of-type{border-bottom:0}
+.zeile-name{display:flex;align-items:center;gap:10px;font-weight:600;min-width:0}
+.zeile-name svg{flex:none}
+.zeile-name span{overflow:hidden;text-overflow:ellipsis}
+.stepper{display:flex;align-items:center;gap:3px;flex:none}
+.stepper button{width:37px;height:37px;border-radius:50%;border:1px solid var(--kante);background:#F7F8F5;
+  color:var(--tanne);font-size:20px;line-height:1;cursor:pointer;display:grid;place-items:center;font-family:inherit}
+.stepper button:hover:not(:disabled){border-color:var(--tanne);background:var(--tanne);color:#fff}
+.stepper button:disabled{opacity:.35;cursor:default}
+.stepper output{font-family:"Space Mono",monospace;font-size:18px;font-weight:700;min-width:30px;text-align:center}
+.stepper output.null{color:#B9BFB7}
+
+.knopf{width:100%;background:var(--tanne);color:#fff;border:0;border-radius:9px;padding:14px;
+  font-family:"Anton",sans-serif;font-size:18px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;margin-top:4px}
+.knopf:hover{background:var(--tanne-hell)}
+.knopf.zweit{background:transparent;color:var(--grau);border:1px solid var(--kante);font-size:15px;padding:11px;
+  font-family:"Karla",sans-serif;letter-spacing:0;text-transform:none;margin-top:8px}
+.knopf.zweit:hover{color:var(--signal);border-color:var(--signal);background:transparent}
+.knopf.rot{background:var(--signal)}
+.knopf.rot:hover{background:#A8182A}
+
+/* Meldeliste */
+.meldung{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid #EDEFEA;align-items:flex-start}
+.meldung:last-child{border-bottom:0}
+.meldung .wer{flex:1;min-width:0}
+.meldung .wer b{font-weight:700;display:block}
+.meldung .wer small{color:var(--signal);font-size:13px;display:block;font-family:"Space Mono",monospace}
+.meldung .was{font-family:"Space Mono",monospace;font-size:14px;text-align:right;white-space:nowrap;color:var(--tanne)}
+.meldung.eigen{border-left:3px solid var(--signal);padding-left:11px;margin-left:-14px}
+.mitbringsel{margin-top:14px;padding-top:13px;border-top:1px dashed var(--kante);color:var(--tinte);font-size:15px}
+.mitbringsel b{color:var(--grau);font-family:"Space Mono",monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;display:block;margin-bottom:6px}
+
+/* Editor */
+.ed-zeile{display:flex;gap:8px;align-items:center;margin-bottom:9px}
+.ed-bild{flex:none;display:grid;place-items:center;width:36px}
+.ed-zeile select{width:104px;flex:none;padding:10px 6px;font-size:15px}
+.ed-zeile input{flex:1;min-width:0}
+.ed-zeile button{width:40px;height:40px;flex:none;border:1px solid var(--kante);background:#F7F8F5;border-radius:9px;
+  color:var(--signal);font-size:19px;cursor:pointer;line-height:1}
+.ed-zeile button:hover{background:var(--signal);color:#fff;border-color:var(--signal)}
+
+a.knopf{display:block;text-align:center;text-decoration:none;box-sizing:border-box}
+.teil-status{margin:10px 0 0;text-align:center;font-size:14px;color:#F0EDE1;line-height:1.5;word-break:break-all}
+.teil-status b{display:block;font-family:"Space Mono",monospace;font-size:13px;color:var(--gold);margin-top:4px}
+.termin-feld{background:rgba(255,255,255,.08);border:1px solid rgba(240,201,73,.35);border-radius:9px;
+  padding:7px 13px;cursor:pointer;text-align:left;font-family:inherit;display:block}
+.termin-feld:hover{border-color:var(--gold);background:rgba(255,255,255,.14)}
+.termin-label{display:block;font-family:"Space Mono",monospace;font-size:10px;letter-spacing:.18em;
+  text-transform:uppercase;color:#B7C7BB}
+.termin-datum{display:block;font-family:"Space Mono",monospace;font-size:15px;font-weight:700;color:var(--gold)}
+.extra-eingabe{display:flex;gap:8px}
+.extra-eingabe input{flex:1;min-width:0;background:#F7F8F5;border:1px solid var(--kante);color:var(--tinte);
+  border-radius:9px;padding:10px 12px;font-family:inherit;font-size:16px}
+.extra-plus{flex:none;border:1px solid var(--kante);background:#F7F8F5;border-radius:9px;padding:10px 14px;
+  font-family:inherit;font-size:15px;color:var(--schild);cursor:pointer}
+.extra-plus:hover{background:var(--schild);color:#fff;border-color:var(--schild)}
+.extra-zeile{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 0;
+  border-bottom:1px solid #EDEFEA;font-family:"Space Mono",monospace;font-size:14px}
+.extra-zeile:last-child{border-bottom:0}
+.extra-leer{color:var(--grau);font-size:14px;padding:9px 0}
+.termin-lang{font-family:"Space Mono",monospace;font-size:12px;letter-spacing:.06em;color:var(--grau);text-transform:none}
+.tage-wahl{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px}
+.tag-knopf{flex:1;min-width:44px;background:#F7F8F5;border:1px solid var(--kante);color:var(--grau);
+  font-family:"Space Mono",monospace;font-size:14px;padding:11px 4px;border-radius:9px;cursor:pointer}
+.tag-knopf:hover{border-color:var(--schild)}
+.tag-knopf.an{background:var(--schild);border-color:var(--schild);color:#fff;font-weight:700}
+.link-mini{background:none;border:0;color:#F0EDE1;text-decoration:underline;font-family:inherit;
+  font-size:13px;cursor:pointer;padding:6px 2px;opacity:.85}
+.link-mini:hover{opacity:1;color:var(--gold)}
+.form-status{margin:10px 0 0;padding:10px 12px;border-radius:9px;background:#E6EEE3;border:1px solid #B9CDB4;
+  color:#2C4326;font-size:15px;text-align:center}
+.mini{background:none;border:0;padding:2px 6px;margin-left:2px;font-family:"Space Mono",monospace;font-size:12px;
+  color:var(--grau);cursor:pointer;border-radius:5px;text-transform:uppercase;letter-spacing:.08em}
+.mini:hover{background:var(--schild);color:#fff}
+.mini.weg:hover{background:var(--rot);color:#fff}
+.meldung .aktionen{flex:none;display:flex;align-items:center}
+.fuss{text-align:center;color:#F0EDE1;font-size:13px;line-height:1.7;padding:0 18px}
+.banner{position:fixed;left:50%;transform:translateX(-50%);bottom:16px;z-index:60;
+  width:calc(100% - 36px);max-width:600px;background:#FDF3D8;border:1px solid #C9A22C;color:#5C4708;
+  border-radius:9px;padding:12px 14px;font-size:15px;text-align:center;box-shadow:0 6px 18px rgba(20,16,8,.3)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="seite">
+
+  <header class="kopf">
+    <img id="logo" src="data:image/png;base64,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" alt="SSV Pfungstadt" onerror="this.remove()">
+    <div>
+      <div class="eyebrow">Schießsportvereinigung Pfungstadt 1927</div>
+      <h1>Grillabend<br><em>Freitags</em></h1>
+    </div>
+  </header>
+  <div class="termin">
+    <button class="termin-feld" id="terminFeld">
+      <span class="termin-label">Nächster Grillabend</span>
+      <span class="termin-datum" id="terminDatum">–</span>
+    </button>
+    <span id="meldezahlKopf"></span>
+  </div>
+
+  <div class="inhalt">
+
+    <div id="banner" class="banner" hidden></div>
+
+    <section class="rost-karte">
+      <div class="rost-kopf">
+        <h2>Gesamt zu grillen<br><span class="termin-lang" id="terminLang"></span></h2>
+        <span id="meldezahl">0 Bestellungen</span>
+      </div>
+      <div class="zaehlung" id="zaehlung"></div>
+    </section>
+
+    <section class="karte">
+      <h2 id="formTitel">Neue Bestellung</h2>
+      <p class="hinweis">Name eintragen, Mengen wählen, speichern. Danach ist das Formular wieder frei für den Nächsten. Wer nur mitisst, ohne etwas vom Grill zu wollen, muss sich hier nicht eintragen.</p>
+
+      <div class="feld">
+        <label for="name">Name</label>
+        <input type="text" id="name" placeholder="z. B. Michael K." autocomplete="name" maxlength="40">
+      </div>
+
+      <div id="artikelZeilen"></div>
+
+      <div class="feld" style="margin-top:16px">
+        <label for="mitbringsel">Ich bringe mit</label>
+        <input type="text" id="mitbringsel" placeholder="z. B. Kartoffelsalat, Tiramisu" maxlength="80">
+      </div>
+
+      <button class="knopf" id="senden">Bestellung speichern</button>
+      <p class="form-status" id="formStatus" hidden></p>
+      <button class="knopf zweit" id="abbrechen" hidden>Bearbeiten abbrechen</button>
+      <button class="knopf zweit" id="editorAuf">Grilltage und Grillsachen bearbeiten</button>
+    </section>
+
+    <section class="karte" id="pinKarte" hidden>
+      <h2>Vorstandsbereich</h2>
+      <p class="hinweis">Grilltage und Grillsachen ändern nur die, die die PIN haben.</p>
+      <div class="feld" style="margin-bottom:10px">
+        <label for="pin">PIN</label>
+        <input type="password" id="pin" inputmode="numeric" autocomplete="off" maxlength="12" placeholder="••••">
+      </div>
+      <button class="knopf" id="pinPruefen">Freischalten</button>
+      <button class="knopf zweit" id="pinAbbrechen">Abbrechen</button>
+    </section>
+
+    <section class="karte" id="editor" hidden>
+      <h2>Einstellungen</h2>
+      <p class="hinweis">Gilt für alle. Bereits abgegebene Bestellungen bleiben erhalten.</p>
+
+      <label>Wöchentlicher Grilltag</label>
+      <p class="hinweis" style="margin:-2px 0 8px">Läuft jede Woche automatisch weiter. Nochmal antippen schaltet den festen Termin aus.</p>
+      <div class="tage-wahl" id="tageWahl"></div>
+
+      <label style="margin-top:20px">Zusätzliche Termine</label>
+      <p class="hinweis" style="margin:-2px 0 8px">Einmalige Ausnahmen, etwa ein Dienstag. Der jeweils nächste Termin steht dann oben auf der Seite.</p>
+      <div class="extra-eingabe">
+        <input type="date" id="extraDatum" aria-label="Zusätzlicher Grilltermin">
+        <button type="button" class="extra-plus" id="extraPlus">Hinzufügen</button>
+      </div>
+      <div id="extraListe"></div>
+
+      <label style="margin-top:20px">Was auf den Grill kann</label>
+      <p class="hinweis" style="margin:-2px 0 8px">Links das Bild wählen. Passt keins, bleibt es beim Anfangsbuchstaben.</p>
+      <div id="editorZeilen"></div>
+      <button class="knopf zweit" id="editorPlus" style="margin-top:4px">+ Grillsache hinzufügen</button>
+      <button class="knopf" id="editorSpeichern">Einstellungen speichern</button>
+      <button class="knopf zweit" id="editorZu">Abbrechen</button>
+    </section>
+
+    <section class="karte">
+      <h2>Bestellungen</h2>
+      <p class="hinweis" id="listeHinweis">Noch keine Bestellungen.</p>
+      <div id="liste"></div>
+      <div class="mitbringsel" id="mitbringliste" hidden></div>
+    </section>
+
+    <a class="knopf rot" id="teilen" href="#" target="_blank" rel="noopener">Link in WhatsApp teilen</a>
+    <button class="knopf zweit" id="kopieren">Link kopieren</button>
+    <p class="teil-status" id="teilStatus"></p>
+  </div>
+
+  <p class="fuss">Der Stand aktualisiert sich automatisch.<br><span id="modus"></span><br>
+    <button class="link-mini" id="adminAuf">Einstellungen (Vorstand)</button></p>
+</div>
+
+<script type="module">
+/* ═══════════════════════════════════════════════════════════════
+   1. KONFIGURATION
+   ═══════════════════════════════════════════════════════════════
+   Firebase-Config aus der Firebase-Konsole hier einsetzen
+   (Projekteinstellungen → Meine Apps → Web-App):
+
+   const FIREBASE = {
+     apiKey: "…", authDomain: "…", projectId: "…",
+     storageBucket: "…", messagingSenderId: "…", appId: "…"
+   };
+
+   Solange das null ist, läuft die Seite im Testmodus:
+   Bestellungen bleiben nur im eigenen Browser.
+   Logo: ist als Bild direkt in dieser Datei eingebettet.           */
+
+const FIREBASE = null;
+
+/* PIN für den Vorstandsbereich. Wer sie kennt, darf Grilltage und
+   Grillsachen ändern. Hier frei änderbar.                          */
+const ADMIN_PIN = "1927";
+
+const STANDARD_ARTIKEL = [
+  { id:"steak",     name:"Steak",           symbol:"steak" },
+  { id:"burger",    name:"Burger",          symbol:"burger" },
+  { id:"bratwurst", name:"Bratwurst",       symbol:"wurst" },
+  { id:"duenne",    name:"Dünne Bratwurst", symbol:"duenne" }
+];
+const STANDARD_WOCHENTAG = 5;              // 0 = Sonntag … 5 = Freitag … 6 = Samstag
+const TAG_KURZ = ["So","Mo","Di","Mi","Do","Fr","Sa"];
+
+const SYMBOLE = {
+  steak:`<svg width="34" height="26" viewBox="0 0 34 26"><path d="M4 13C4 6 10 2 18 2c9 0 13 4 13 10s-5 12-14 12S4 20 4 13z" fill="#8C3A22"/><path d="M9 13c0-4.5 4-7.5 9.5-7.5 6 0 8.5 3 8.5 7 0 4.5-3.5 8-9 8S9 17.5 9 13z" fill="#B04E2C"/><path d="M14 9c3 1 5 3 6 6M18 8c2.5 2 3.5 4 4 7" stroke="#6E2A16" stroke-width="1.4" stroke-linecap="round" fill="none"/></svg>`,
+  burger:`<svg width="34" height="26" viewBox="0 0 34 26"><path d="M3 12c0-6 6-10 14-10s14 4 14 10z" fill="#D2913F"/><rect x="2" y="12" width="30" height="4" rx="2" fill="#7CA34B"/><rect x="3" y="15" width="28" height="5" rx="2.5" fill="#6E3A1E"/><path d="M3 20h28c0 3-6 5-14 5S3 23 3 20z" fill="#C4842F"/><circle cx="12" cy="7" r="1" fill="#F2E3C0"/><circle cx="18" cy="5" r="1" fill="#F2E3C0"/><circle cx="24" cy="8" r="1" fill="#F2E3C0"/></svg>`,
+  wurst:`<svg width="34" height="26" viewBox="0 0 34 26"><path d="M4 17c2-8 8-11 13-11s13 2 13 8" stroke="#A85A2A" stroke-width="9" stroke-linecap="round" fill="none"/><path d="M4 17c2-8 8-11 13-11s13 2 13 8" stroke="#C97A42" stroke-width="4" stroke-linecap="round" fill="none"/></svg>`,
+  duenne:`<svg width="34" height="26" viewBox="0 0 34 26"><path d="M3 19c3-9 9-13 15-13 5 0 11 3 13 7" stroke="#B4653A" stroke-width="5" stroke-linecap="round" fill="none"/><path d="M3 19c3-9 9-13 15-13 5 0 11 3 13 7" stroke="#D6905C" stroke-width="2" stroke-linecap="round" fill="none"/></svg>`,
+  bauch:`<svg width="34" height="26" viewBox="0 0 34 26"><rect x="3" y="5" width="28" height="16" rx="3" fill="#C86A4A"/><rect x="3" y="8" width="28" height="3" fill="#F2E0D2"/><rect x="3" y="14" width="28" height="3" fill="#F2E0D2"/><rect x="3" y="5" width="28" height="16" rx="3" fill="none" stroke="#8E4028" stroke-width="1.4"/></svg>`,
+  kaese:`<svg width="34" height="26" viewBox="0 0 34 26"><path d="M5 6h24l-3 14H8z" fill="#F0DC9B" stroke="#C9AE5E" stroke-width="1.4" stroke-linejoin="round"/><path d="M10 9l14 0M11 13l12 0M12 17l10 0" stroke="#C9AE5E" stroke-width="1.3" stroke-linecap="round"/></svg>`,
+  mais:`<svg width="34" height="26" viewBox="0 0 34 26"><path d="M8 20c-3-4-3-10 1-13 5-4 13-3 17 1-2 6-7 12-13 13-2 .3-4 0-5-1z" fill="#EFC94C"/><path d="M12 8l-2 10M16 6l-2 12M20 6l-2 11" stroke="#C9A22C" stroke-width="1.2"/><path d="M8 20c-4 1-6 3-6 3s3 1 6-1" fill="#6E9B4A"/></svg>`,
+  gemuese:`<svg width="34" height="26" viewBox="0 0 34 26"><circle cx="10" cy="14" r="6" fill="#7CA34B"/><circle cx="19" cy="12" r="5" fill="#C0453A"/><circle cx="26" cy="15" r="4.5" fill="#E0A83C"/><path d="M4 21h26" stroke="#5A6B4A" stroke-width="1.5" stroke-linecap="round"/></svg>`,
+  ei:`<svg width="34" height="26" viewBox="0 0 34 26"><ellipse cx="17" cy="14" rx="14" ry="10" fill="#FBF6E8"/><ellipse cx="17" cy="13" rx="5.5" ry="5" fill="#F0B93C"/></svg>`,
+  keule:`<svg width="34" height="26" viewBox="0 0 34 26"><path d="M12 20c-4 0-7-3-7-7 0-6 6-11 12-11 5 0 8 3 8 7 0 6-6 11-13 11z" fill="#B4713F"/><path d="M13 18c-2.5 0-4.5-2-4.5-4.5 0-4 4-8 8-8 3.5 0 5.5 2 5.5 4.5 0 4-4.5 8-9 8z" fill="#CE9059"/><path d="M23 14l7 6" stroke="#EFE6D2" stroke-width="4" stroke-linecap="round"/></svg>`,
+  spiess:`<svg width="34" height="26" viewBox="0 0 34 26"><path d="M2 13h30" stroke="#B9A98E" stroke-width="2" stroke-linecap="round"/><rect x="6" y="7" width="7" height="12" rx="2" fill="#A85A2A"/><rect x="14.5" y="7" width="6" height="12" rx="2" fill="#7CA34B"/><rect x="22" y="7" width="7" height="12" rx="2" fill="#C0453A"/></svg>`,
+  fisch:`<svg width="34" height="26" viewBox="0 0 34 26"><path d="M4 13c4-6 10-8 15-8 6 0 9 4 9 8s-3 8-9 8c-5 0-11-2-15-8z" fill="#8AA7B8"/><path d="M28 13l4-5v10z" fill="#6C8B9E"/><circle cx="11" cy="11" r="1.6" fill="#2B3A42"/></svg>`,
+  brot:`<svg width="34" height="26" viewBox="0 0 34 26"><path d="M4 16c0-6 5-10 13-10s13 4 13 10c0 3-2 5-5 5H9c-3 0-5-2-5-5z" fill="#D2A05A"/><path d="M12 9l3 10M18 8l2 11M24 10l1 9" stroke="#B07F3C" stroke-width="1.3" stroke-linecap="round"/></svg>`,
+  salat:`<svg width="34" height="26" viewBox="0 0 34 26"><path d="M4 14h26c0 5-6 9-13 9S4 19 4 14z" fill="#E3E0D6" stroke="#BEB9A9" stroke-width="1.2"/><path d="M7 14c1-5 5-8 10-8s9 3 10 8z" fill="#7CA34B"/><circle cx="14" cy="10" r="2.4" fill="#C0453A"/><circle cx="21" cy="11" r="2" fill="#E0A83C"/></svg>`,
+  kuchen:`<svg width="34" height="26" viewBox="0 0 34 26"><path d="M6 21V11h22v10z" fill="#E8C79A"/><path d="M6 11c0-3 5-5 11-5s11 2 11 5z" fill="#C0453A"/><path d="M6 15h22" stroke="#CBA478" stroke-width="1.6"/><path d="M17 6V3" stroke="#7CA34B" stroke-width="1.6" stroke-linecap="round"/></svg>`,
+  kartoffel:`<svg width="34" height="26" viewBox="0 0 34 26"><path d="M5 14c0-6 5-10 12-10s13 3 13 9c0 5-6 9-13 9S5 19 5 14z" fill="#C79A5E"/><circle cx="13" cy="12" r="1.3" fill="#9A733F"/><circle cx="20" cy="15" r="1.3" fill="#9A733F"/><circle cx="23" cy="10" r="1.1" fill="#9A733F"/></svg>`,
+  pommes:`<svg width="34" height="26" viewBox="0 0 34 26"><rect x="9" y="2" width="4" height="12" rx="1.5" fill="#EFC94C"/><rect x="14" y="4" width="4" height="10" rx="1.5" fill="#F2D66B"/><rect x="19" y="2" width="4" height="12" rx="1.5" fill="#EFC94C"/><path d="M7 12h18l-2 11H9z" fill="#C0453A"/></svg>`,
+  getraenk:`<svg width="34" height="26" viewBox="0 0 34 26"><path d="M11 4h12l-1.5 19h-9z" fill="#D9B37A"/><path d="M11.6 10h10.8l-1 13h-9z" fill="#A8712C"/><path d="M23 8h4a3 3 0 010 6h-3.5" fill="none" stroke="#D9B37A" stroke-width="2"/></svg>`,
+  sonstiges:`<svg width="34" height="26" viewBox="0 0 34 26"><circle cx="17" cy="13" r="9" fill="#8A7B6E" stroke="#5E5248" stroke-width="1.4"/><path d="M12 10l10 6M12 16l10-6" stroke="#5E5248" stroke-width="1.3" stroke-linecap="round"/></svg>`
+};
+const SYMBOL_NAMEN = {
+  auto:"Anfangsbuchstabe",
+  steak:"Steak", burger:"Burger", wurst:"Wurst", duenne:"Dünne Wurst",
+  keule:"Hähnchen", bauch:"Speck/Bauch", spiess:"Spieß", fisch:"Fisch",
+  ei:"Ei/Omelett", kaese:"Käse", mais:"Mais", kartoffel:"Kartoffel",
+  gemuese:"Gemüse", salat:"Salat", brot:"Brot/Brötchen", pommes:"Pommes",
+  kuchen:"Nachtisch", getraenk:"Getränk", sonstiges:"Sonstiges"
+};
+
+/* Ist kein passendes Bild dabei, steht der Anfangsbuchstabe im Vereinsgrün.
+   Sieht bei "Omelett" oder "Frühstücksei" deutlich besser aus als ein Platzhalter. */
+function buchstabenSymbol(name){
+  const b = text((name || "?").trim().charAt(0).toUpperCase() || "?");
+  return `<svg width="34" height="26" viewBox="0 0 34 26" role="img"><circle cx="17" cy="13" r="11" fill="#4B605F"/>`
+       + `<text x="17" y="18.5" text-anchor="middle" font-family="Anton, Impact, sans-serif" font-size="15" fill="#F0C949">${b}</text></svg>`;
+}
+const symbolFuer = a => (a.symbol && a.symbol !== "auto" && SYMBOLE[a.symbol]) || buchstabenSymbol(a.name);
+
+/* ═══════════════════════════════════════════════════════════════
+   2. Termine aus den eingestellten Grilltagen
+   ═══════════════════════════════════════════════════════════════ */
+const schluesselVon = d =>
+  `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+
+const heuteNull = () => { const j = new Date(); return new Date(j.getFullYear(), j.getMonth(), j.getDate()); };
+const datumVon  = sch => { const [j,m,t] = sch.split("-").map(Number); return new Date(j, m-1, t); };
+
+/* Der nächste anstehende Termin: fester Wochentag oder ein Zusatztermin,
+   je nachdem, was zuerst kommt.                                        */
+function naechsterTermin(){
+  const start = heuteNull();
+  const kandidaten = [];
+  if (wochentag !== null){
+    const d = new Date(start);
+    d.setDate(start.getDate() + ((wochentag - start.getDay() + 7) % 7));
+    kandidaten.push(d);
+  }
+  extra.forEach(sch => { const d = datumVon(sch); if (d >= start) kandidaten.push(d); });
+  kandidaten.sort((a,b) => a - b);
+  return kandidaten[0] || null;
+}
+const langesDatum = d => d.toLocaleDateString("de-DE",{weekday:"long",day:"2-digit",month:"long"});
+const kurzesDatum = d => TAG_KURZ[d.getDay()] + " " + d.toLocaleDateString("de-DE",{day:"2-digit",month:"2-digit"});
+
+/* ═══════════════════════════════════════════════════════════════
+   3. Speicher: Firestore oder lokaler Testmodus
+   ═══════════════════════════════════════════════════════════════ */
+let speicher, firebaseAktiv = false;
+
+async function speicherAufbauen(){
+  if (FIREBASE && FIREBASE.projectId){
+    const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
+    const { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc } =
+      await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+    const db = getFirestore(initializeApp(FIREBASE));
+    const konfigPfad = doc(db, "konfiguration", "grillabend");
+    const meldungen  = sch => collection(db, "grillabende", sch, "meldungen");
+    firebaseAktiv = true;
+    return {
+      konfigAbonnieren: cb => onSnapshot(konfigPfad, s => cb(s.exists() ? s.data() : {})),
+      konfigSpeichern:  daten => setDoc(konfigPfad, daten),
+      meldungenAbonnieren: (sch, cb) =>
+        onSnapshot(meldungen(sch), s => cb(s.docs.map(d => ({ id:d.id, ...d.data() })))),
+      meldungSpeichern: (sch, id, daten) => setDoc(doc(meldungen(sch), id), daten),
+      meldungLoeschen:  (sch, id) => deleteDoc(doc(meldungen(sch), id))
+    };
+  }
+
+  // Testmodus im eigenen Browser
+  const lesen = k => JSON.parse(localStorage.getItem(k) || "null");
+  const mKey = sch => "grill-meldungen-" + sch;
+  let kCb = () => {}, mCb = () => {}, mSch = null;
+  const kSend = () => kCb(lesen("grill-konfig") || {});
+  const mSend = () => { if (mSch) mCb(lesen(mKey(mSch)) || []); };
+  return {
+    konfigAbonnieren: cb => { kCb = cb; kSend(); },
+    konfigSpeichern: daten => { localStorage.setItem("grill-konfig", JSON.stringify(daten)); kSend(); },
+    meldungenAbonnieren: (sch, cb) => { mSch = sch; mCb = cb; mSend(); return () => { mCb = () => {}; }; },
+    meldungSpeichern: (sch, id, daten) => {
+      const alle = (lesen(mKey(sch)) || []).filter(m => m.id !== id);
+      alle.push({ id, ...daten });
+      localStorage.setItem(mKey(sch), JSON.stringify(alle)); mSend();
+    },
+    meldungLoeschen: (sch, id) => {
+      localStorage.setItem(mKey(sch), JSON.stringify((lesen(mKey(sch)) || []).filter(m => m.id !== id)));
+      mSend();
+    }
+  };
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   4. Zustand
+   ═══════════════════════════════════════════════════════════════ */
+let artikel   = STANDARD_ARTIKEL.slice();
+let wochentag = STANDARD_WOCHENTAG;   // fester Wochentag, null = keiner
+let extra     = [];                   // einmalige Zusatztermine als "JJJJ-MM-TT"
+let aktiv     = null;          // aktuell gewählter Termin (Date)
+let abmelden  = null;          // beendet das Abo des vorherigen Termins
+let meldungen = [];
+let mengen    = {};
+let bearbeiteId = null;        // gesetzt, solange eine bestehende Meldung geändert wird
+let admin = false;             // Freischaltung gilt nur bis zum Speichern oder Abbrechen
+
+const zeilenBox = document.getElementById("artikelZeilen");
+const nameFeld  = document.getElementById("name");
+const mitFeld   = document.getElementById("mitbringsel");
+
+/* Formularzeilen aus der Artikelliste bauen */
+function formularBauen(){
+  zeilenBox.innerHTML = artikel.map(a => `
+    <div class="zeile">
+      <span class="zeile-name">${symbolFuer(a)}<span>${text(a.name)}</span></span>
+      <span class="stepper">
+        <button type="button" data-minus="${a.id}" aria-label="${text(a.name)} weniger">–</button>
+        <output id="out-${a.id}" aria-live="polite">0</output>
+        <button type="button" data-plus="${a.id}" aria-label="${text(a.name)} mehr">+</button>
+      </span>
+    </div>`).join("");
+  artikel.forEach(a => { if (mengen[a.id] === undefined) mengen[a.id] = 0; });
+  mengenZeichnen();
+}
+zeilenBox.addEventListener("click", e => {
+  const plus = e.target.dataset?.plus, minus = e.target.dataset?.minus;
+  if (plus)  mengen[plus]  = Math.min(20, (mengen[plus]||0) + 1);
+  if (minus) mengen[minus] = Math.max(0, (mengen[minus]||0) - 1);
+  if (plus || minus) mengenZeichnen();
+});
+function mengenZeichnen(){
+  artikel.forEach(a => {
+    const out = document.getElementById("out-" + a.id);
+    if (!out) return;
+    const n = mengen[a.id] || 0;
+    out.textContent = n;
+    out.classList.toggle("null", n === 0);
+    zeilenBox.querySelector(`[data-minus="${a.id}"]`).disabled = n === 0;
+    zeilenBox.querySelector(`[data-plus="${a.id}"]`).disabled  = n === 20;
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   5. Meldung speichern, ändern, löschen
+   ═══════════════════════════════════════════════════════════════ */
+document.getElementById("senden").addEventListener("click", async () => {
+  const name = nameFeld.value.trim();
+  const mitbringsel = mitFeld.value.trim();
+  const summe = artikel.reduce((s,a) => s + (mengen[a.id]||0), 0);
+  if (!aktiv) return melde("Es ist kein Grilltag eingestellt. Das lässt sich unter Einstellungen ändern.");
+  if (!name) return melde("Trag zuerst den Namen ein.", nameFeld);
+  if (!summe && !mitbringsel) return melde("Wähle etwas vom Grill oder trag ein, was mitgebracht wird.");
+
+  const id = bearbeiteId || (crypto.randomUUID?.() || "id" + Date.now() + Math.random().toString(36).slice(2));
+  const daten = { name, mitbringsel, zeit: Date.now(), posten:{} };
+  artikel.forEach(a => { if (mengen[a.id]) daten.posten[a.id] = mengen[a.id]; });
+
+  try {
+    await speicher.meldungSpeichern(schluesselVon(aktiv), id, daten);
+    const geaendert = Boolean(bearbeiteId);
+    formularLeeren();
+    formStatus(geaendert
+      ? `Bestellung von ${name} geändert. Der Nächste kann eintragen.`
+      : `Gespeichert für ${name}. Der Nächste kann eintragen.`);
+    nameFeld.focus();
+  } catch { melde("Speichern hat nicht geklappt. Verbindung prüfen und noch einmal versuchen."); }
+});
+
+document.getElementById("abbrechen").addEventListener("click", () => formularLeeren());
+
+function formularLeeren(){
+  bearbeiteId = null;
+  nameFeld.value = "";
+  mitFeld.value  = "";
+  artikel.forEach(a => mengen[a.id] = 0);
+  mengenZeichnen();
+  document.getElementById("formTitel").textContent = "Neue Bestellung";
+  document.getElementById("senden").textContent    = "Bestellung speichern";
+  document.getElementById("abbrechen").hidden = true;
+  alleZeichnen();
+}
+
+function formularFuellen(m){
+  bearbeiteId = m.id;
+  nameFeld.value = m.name || "";
+  mitFeld.value  = m.mitbringsel || "";
+  artikel.forEach(a => mengen[a.id] = anzahl(m, a.id));
+  mengenZeichnen();
+  document.getElementById("formTitel").textContent = "Bestellung von " + m.name + " ändern";
+  document.getElementById("senden").textContent    = "Änderung speichern";
+  document.getElementById("abbrechen").hidden = false;
+  document.getElementById("formStatus").hidden = true;
+  alleZeichnen();
+  document.getElementById("formTitel").scrollIntoView({behavior:"smooth", block:"start"});
+}
+
+function formStatus(t){
+  const el = document.getElementById("formStatus");
+  el.textContent = t; el.hidden = false;
+  clearTimeout(formStatus.t);
+  formStatus.t = setTimeout(() => el.hidden = true, 6000);
+}
+
+function melde(t, fokus){
+  const b = document.getElementById("banner");
+  b.textContent = t; b.hidden = false;
+  if (fokus) fokus.focus();
+  clearTimeout(melde.t);
+  melde.t = setTimeout(() => b.hidden = true, 4000);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   6. Einstellungen: Grilltage und Grillsachen
+   ═══════════════════════════════════════════════════════════════ */
+let entwurfTag = null, entwurfExtra = [], entwurfListe = [];
+const editor   = document.getElementById("editor");
+const edZeilen = document.getElementById("editorZeilen");
+const tageWahl = document.getElementById("tageWahl");
+
+function einstellungenOeffnen(zielId){
+  if (!admin) return pinAbfragen(zielId);
+  entwurfTag   = wochentag;
+  entwurfExtra = extra.filter(sch => datumVon(sch) >= heuteNull());
+  entwurfListe = artikel.map(a => ({...a}));
+  tageZeichnen(); extraZeichnen(); editorZeichnen();
+  editor.hidden = false;
+  const ziel = zielId ? document.getElementById(zielId) : editor;
+  (ziel || editor).scrollIntoView({behavior:"smooth", block:"center"});
+  if (zielId === "tageWahl") tageWahl.querySelector(".tag-knopf")?.focus();
+}
+document.getElementById("editorAuf").addEventListener("click", () => einstellungenOeffnen());
+
+/* PIN-Abfrage */
+const pinKarte = document.getElementById("pinKarte");
+const pinFeld  = document.getElementById("pin");
+let pinZiel = null;
+
+function pinAbfragen(zielId){
+  pinZiel = zielId || null;
+  pinKarte.hidden = false;
+  pinFeld.value = "";
+  pinKarte.scrollIntoView({behavior:"smooth", block:"center"});
+  pinFeld.focus();
+}
+document.getElementById("pinAbbrechen").addEventListener("click", () => pinKarte.hidden = true);
+pinFeld.addEventListener("keydown", e => { if (e.key === "Enter") pinFreischalten(); });
+document.getElementById("pinPruefen").addEventListener("click", pinFreischalten);
+
+function pinFreischalten(){
+  if (pinFeld.value !== ADMIN_PIN) return melde("Die PIN stimmt nicht.");
+  admin = true;
+  pinKarte.hidden = true;
+  adminAnzeigen();
+  einstellungenOeffnen(pinZiel);
+}
+
+document.getElementById("adminAuf").addEventListener("click", () => {
+  if (admin){ sperren(); melde("Vorstandsbereich wieder gesperrt."); }
+  else pinAbfragen();
+});
+
+function adminAnzeigen(){
+  document.getElementById("editorAuf").hidden = !admin;
+  document.getElementById("adminAuf").textContent = admin
+    ? "Vorstandsbereich sperren"
+    : "Einstellungen (Vorstand)";
+}
+document.getElementById("editorZu").addEventListener("click", () => sperren());
+
+/* Nach jedem Vorgang ist der Vorstandsbereich wieder zu */
+function sperren(){
+  admin = false;
+  editor.hidden = true;
+  pinKarte.hidden = true;
+  adminAnzeigen();
+}
+document.getElementById("editorPlus").addEventListener("click", () => {
+  entwurfListe.push({ id:"art" + Date.now().toString(36) + Math.random().toString(36).slice(2,5), name:"", symbol:"auto" });
+  editorZeichnen();
+  edZeilen.querySelector(".ed-zeile:last-child input")?.focus();
+});
+
+function tageZeichnen(){
+  tageWahl.innerHTML = [1,2,3,4,5,6,0].map(t =>
+    `<button type="button" class="tag-knopf${entwurfTag === t ? " an" : ""}" data-tag="${t}"
+             aria-pressed="${entwurfTag === t}">${TAG_KURZ[t]}</button>`).join("");
+}
+tageWahl.addEventListener("click", e => {
+  const t = e.target.dataset.tag;
+  if (t === undefined) return;
+  const n = Number(t);
+  entwurfTag = (entwurfTag === n) ? null : n;
+  tageZeichnen();
+});
+
+const extraListe = document.getElementById("extraListe");
+function extraZeichnen(){
+  entwurfExtra.sort();
+  extraListe.innerHTML = entwurfExtra.length
+    ? entwurfExtra.map(sch => `<div class="extra-zeile"><span>${kurzesDatum(datumVon(sch))}</span>
+        <button type="button" class="mini weg" data-extraweg="${sch}">entfernen</button></div>`).join("")
+    : `<div class="extra-leer">Keine Zusatztermine eingetragen.</div>`;
+}
+document.getElementById("extraPlus").addEventListener("click", () => {
+  const feld = document.getElementById("extraDatum");
+  const wert = feld.value;
+  if (!wert) return melde("Wähle zuerst ein Datum aus.");
+  if (datumVon(wert) < heuteNull()) return melde("Das Datum liegt in der Vergangenheit.");
+  if (!entwurfExtra.includes(wert)) entwurfExtra.push(wert);
+  feld.value = "";
+  extraZeichnen();
+});
+extraListe.addEventListener("click", e => {
+  const weg = e.target.dataset?.extraweg;
+  if (!weg) return;
+  entwurfExtra = entwurfExtra.filter(x => x !== weg);
+  extraZeichnen();
+});
+
+function editorZeichnen(){
+  edZeilen.innerHTML = entwurfListe.map((a,i) => `
+    <div class="ed-zeile">
+      <span class="ed-bild">${symbolFuer(a)}</span>
+      <select data-symbol="${i}" aria-label="Symbol">
+        ${Object.keys(SYMBOL_NAMEN).map(k => `<option value="${k}"${a.symbol===k?" selected":""}>${SYMBOL_NAMEN[k]}</option>`).join("")}
+      </select>
+      <input type="text" data-name="${i}" value="${text(a.name)}" placeholder="z. B. Schweinebauch" maxlength="30">
+      <button type="button" data-weg="${i}" aria-label="${text(a.name)||"Zeile"} entfernen">×</button>
+    </div>`).join("");
+}
+edZeilen.addEventListener("input", e => {
+  const n = e.target.dataset.name, sy = e.target.dataset.symbol;
+  if (n !== undefined){
+    entwurfListe[n].name = e.target.value;
+    if (!entwurfListe[n].symbol || entwurfListe[n].symbol === "auto"){
+      const bild = edZeilen.querySelectorAll(".ed-bild")[n];
+      if (bild) bild.innerHTML = symbolFuer(entwurfListe[n]);
+    }
+  }
+  if (sy !== undefined){
+    entwurfListe[sy].symbol = e.target.value;
+    const bild = edZeilen.querySelectorAll(".ed-bild")[sy];
+    if (bild) bild.innerHTML = symbolFuer(entwurfListe[sy]);
+  }
+});
+edZeilen.addEventListener("click", e => {
+  const w = e.target.dataset.weg;
+  if (w !== undefined){ entwurfListe.splice(w,1); editorZeichnen(); }
+});
+
+document.getElementById("editorSpeichern").addEventListener("click", async () => {
+  const liste = entwurfListe.map(a => ({...a, name:a.name.trim()})).filter(a => a.name);
+  if (entwurfTag === null && !entwurfExtra.length) return melde("Wähle einen Wochentag oder trag einen Zusatztermin ein.");
+  if (!liste.length) return melde("Es muss mindestens eine Grillsache in der Liste stehen.");
+  try {
+    await speicher.konfigSpeichern({ liste, wochentag: entwurfTag, extra: entwurfExtra.slice().sort() });
+    sperren();
+    melde("Einstellungen gespeichert. Vorstandsbereich ist wieder gesperrt.");
+  } catch { melde("Speichern hat nicht geklappt. Verbindung prüfen und noch einmal versuchen."); }
+});
+
+/* ═══════════════════════════════════════════════════════════════
+   7. Anzeige
+   ═══════════════════════════════════════════════════════════════ */
+const anzahl = (m, id) => (m.posten ? m.posten[id] : m[id]) || 0;   // alte Meldungen bleiben lesbar
+
+function terminZeichnen(){
+  const feld = document.getElementById("terminDatum");
+  feld.textContent = aktiv ? langesDatum(aktiv) : "Kein Termin eingestellt";
+}
+document.getElementById("terminFeld").addEventListener("click", () => einstellungenOeffnen("tageWahl"));
+
+function terminWaehlen(d){
+  if (abmelden) { abmelden(); abmelden = null; }
+  aktiv = d;
+  bearbeiteId = null;
+  meldungen = [];
+  document.getElementById("formTitel").textContent = "Neue Bestellung";
+  document.getElementById("senden").textContent    = "Bestellung speichern";
+  document.getElementById("abbrechen").hidden = true;
+  document.getElementById("terminLang").textContent = kurzesDatum(d);
+  terminZeichnen();
+  abmelden = speicher.meldungenAbonnieren(schluesselVon(d), daten => {
+    meldungen = daten.sort((a,b) => (a.zeit||0) - (b.zeit||0));
+    alleZeichnen();
+  });
+  alleZeichnen();
+}
+
+function alleZeichnen(){
+  // Gesamtzahlen
+  document.getElementById("zaehlung").innerHTML = artikel.map(a => {
+    const n = meldungen.reduce((s,m) => s + anzahl(m, a.id), 0);
+    return `<div class="zahl"><b class="${n?"":"aus"}">${n}</b><span>${text(a.name)}</span></div>`;
+  }).join("");
+
+  const zahlText = meldungen.length === 1 ? "1 Bestellung" : meldungen.length + " Bestellungen";
+  document.getElementById("meldezahl").textContent = zahlText;
+  document.getElementById("meldezahlKopf").textContent = zahlText;
+
+  // Liste
+  const leer = document.getElementById("listeHinweis");
+  leer.hidden = meldungen.length > 0;
+  leer.textContent = aktiv
+    ? `Noch keine Bestellungen für ${langesDatum(aktiv)}.`
+    : "Noch keine Bestellungen.";
+  document.getElementById("liste").innerHTML = meldungen.map(m => {
+    const teile = artikel.filter(a => anzahl(m, a.id) > 0).map(a => `${anzahl(m, a.id)}× ${text(a.name)}`);
+    return `<div class="meldung${m.id === bearbeiteId ? " eigen" : ""}">
+      <span class="wer"><b>${text(m.name)}</b>${m.id===bearbeiteId?"<small>wird gerade bearbeitet</small>":""}</span>
+      <span class="was">${teile.length ? teile.join("<br>") : "–"}</span>
+      <span class="aktionen">
+        <button class="mini" data-bearbeiten="${m.id}">ändern</button>
+        <button class="mini weg" data-loeschen="${m.id}" aria-label="Bestellung von ${text(m.name)} löschen">×</button>
+      </span>
+    </div>`;
+  }).join("");
+
+  // Mitbringsel
+  const mit = meldungen.filter(m => m.mitbringsel);
+  const box = document.getElementById("mitbringliste");
+  box.hidden = mit.length === 0;
+  box.innerHTML = "<b>Dazu kommt</b>" +
+    mit.map(m => `${text(m.mitbringsel)} <span style="color:var(--grau)">(${text(m.name)})</span>`).join(" · ");
+
+  teilLinkAktualisieren();
+}
+
+/* Ändern und Löschen aus der Liste heraus */
+document.getElementById("liste").addEventListener("click", async e => {
+  const bearbeiten = e.target.dataset?.bearbeiten;
+  const loeschen   = e.target.dataset?.loeschen;
+  if (bearbeiten){
+    const m = meldungen.find(x => x.id === bearbeiten);
+    if (m) formularFuellen(m);
+  }
+  if (loeschen){
+    const m = meldungen.find(x => x.id === loeschen);
+    if (!m || !confirm(`Bestellung von ${m.name} löschen?`)) return;
+    if (bearbeiteId === loeschen) formularLeeren();
+    await speicher.meldungLoeschen(schluesselVon(aktiv), loeschen);
+  }
+});
+
+function text(s){
+  return String(s ?? "").replace(/[<>&"]/g, c => ({"<":"&lt;",">":"&gt;","&":"&amp;",'"':"&quot;"}[c]));
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   8. Teilen
+   ═══════════════════════════════════════════════════════════════ */
+const teilKnopf  = document.getElementById("teilen");
+const teilStatus = document.getElementById("teilStatus");
+const seitenAdresse = () => location.origin + location.pathname;
+const imNetz = () => location.protocol === "http:" || location.protocol === "https:";
+
+function teilTextBauen(){
+  const datum = aktiv ? aktiv.toLocaleDateString("de-DE",{weekday:"long",day:"2-digit",month:"2-digit"}) : "";
+  const stand = artikel.map(a => {
+    const n = meldungen.reduce((s,m) => s + anzahl(m, a.id), 0);
+    return n ? `${n}× ${a.name}` : null;
+  }).filter(Boolean).join(", ");
+  return `Grillen beim SSV am ${datum}\n\nHier eintragen, was du haben willst:\n${seitenAdresse()}`
+       + (stand ? `\n\nBisher gemeldet: ${stand}` : "");
+}
+function teilLinkAktualisieren(){
+  teilKnopf.href = "https://wa.me/?text=" + encodeURIComponent(teilTextBauen());
+}
+
+teilKnopf.addEventListener("click", e => {
+  if (!imNetz()){
+    e.preventDefault();
+    teilStatus.innerHTML = "Die Seite liegt noch nicht im Internet, deshalb gibt es noch keinen Link zum Weitergeben. Sobald die Datei hochgeladen ist, öffnet dieser Knopf WhatsApp.";
+    return;
+  }
+  teilStatus.innerHTML = "WhatsApp wird geöffnet. Passiert nichts, hier ist der Link zum Kopieren:<b>" + text(seitenAdresse()) + "</b>";
+});
+
+document.getElementById("kopieren").addEventListener("click", async () => {
+  if (!imNetz()){
+    teilStatus.innerHTML = "Noch kein Link vorhanden – die Datei muss erst auf einen Webserver.";
+    return;
+  }
+  try {
+    await navigator.clipboard.writeText(seitenAdresse());
+    teilStatus.innerHTML = "Link kopiert:<b>" + text(seitenAdresse()) + "</b>";
+  } catch {
+    teilStatus.innerHTML = "Kopieren geht in diesem Browser nicht. Hier der Link zum Markieren:<b>" + text(seitenAdresse()) + "</b>";
+  }
+});
+
+/* ═══════════════════════════════════════════════════════════════
+   9. Start
+   ═══════════════════════════════════════════════════════════════ */
+speicher = await speicherAufbauen();
+
+speicher.konfigAbonnieren(konfig => {
+  artikel   = (Array.isArray(konfig?.liste) && konfig.liste.length) ? konfig.liste : STANDARD_ARTIKEL;
+  wochentag = (konfig && "wochentag" in konfig) ? konfig.wochentag : STANDARD_WOCHENTAG;
+  extra     = Array.isArray(konfig?.extra) ? konfig.extra : [];
+  formularBauen();
+
+  const d = naechsterTermin();
+  if (d && (!aktiv || schluesselVon(d) !== schluesselVon(aktiv))) terminWaehlen(d);
+  else if (!d){ aktiv = null; meldungen = []; terminZeichnen(); alleZeichnen(); }
+  else { terminZeichnen(); alleZeichnen(); }
+});
+
+adminAnzeigen();
+
+document.getElementById("modus").textContent = firebaseAktiv
+  ? "Live für alle Mitglieder."
+  : "Testmodus – Bestellungen bleiben nur in diesem Browser, bis die Firebase-Config eingetragen ist.";
+</script>
+</body>
+</html>
